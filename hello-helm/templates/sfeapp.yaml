@@ -1,0 +1,62 @@
+# ---
+# apiVersion: v1
+# kind: Namespace
+# metadata:
+#   name: default
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: default
+  name: sfe-deployment
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: sfe-app
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: sfe-app
+    spec:
+      containers:
+      - image: 222140259348.dkr.ecr.us-west-1.amazonaws.com/sfe-uw1-pipeline-sfe-uw1-single-file-express:latest
+        imagePullPolicy: Always
+        name: sfe-app
+        ports:
+        - containerPort: 8000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: default
+  name: sfe-service
+spec:
+  ports:
+    - port: 8000
+      targetPort: 8000
+      protocol: TCP
+  type: NodePort
+  selector:
+    app.kubernetes.io/name: sfe-app
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  namespace: default
+  name: sfe-ingress
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+spec:
+  ingressClassName: alb
+  rules:
+    - http:
+        paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: sfe-service
+              port:
+                number: 8000

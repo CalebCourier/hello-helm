@@ -7,17 +7,17 @@
   "scripts": {
     "build": "tsc",
     "cdk": "cdk",
-    "install-local-cdk-constructs": "npm i @tinystacks/cdk-constructs@local --@tinystacks:registry=http://local-npm-registry:4873",
+    "install-local-aws-cdk-constructs": "npm i @tinystacks/aws-cdk-constructs@local --@tinystacks:registry=http://local-npm-registry:4873",
     "install-local-utils": "npm i @tinystacks/utils@local --@tinystacks:registry=http://local-npm-registry:4873",
-    "install-local-packages": "npm run install-local-cdk-constructs; npm run install-local-utils",
-    "install-remote-cdk-constructs": "npm i @tinystacks/cdk-constructs@latest --@tinystacks:registry=https://npm.pkg.github.com",
+    "install-local-packages": "npm run install-local-aws-cdk-constructs; npm run install-local-utils",
+    "install-remote-aws-cdk-constructs": "npm i @tinystacks/aws-cdk-constructs@latest --@tinystacks:registry=https://npm.pkg.github.com",
     "install-remote-utils": "npm i @tinystacks/utils@latest --@tinystacks:registry=https://npm.pkg.github.com",
-    "install-remote-packages": "npm run uninstall-private-packages; npm run install-remote-cdk-constructs; npm run install-remote-utils",
+    "install-remote-packages": "npm run uninstall-private-packages; npm run install-remote-aws-cdk-constructs; npm run install-remote-utils",
     "lint": "./node_modules/.bin/eslint ./",
     "lint-fix": "./node_modules/.bin/eslint --fix ./",
     "qa": "npm run lint && npm run test",
     "test": "jest",
-    "uninstall-private-packages": "npm uninstall @tinystacks/cdk-constructs; npm uninstall @tinystacks/utils",
+    "uninstall-private-packages": "npm uninstall @tinystacks/aws-cdk-constructs; npm uninstall @tinystacks/utils",
     "watch": "tsc -w"
   },
   "devDependencies": {
@@ -36,7 +36,7 @@
     "typescript": "^4.7.4"
   },
   "dependencies": {
-    "@tinystacks/cdk-constructs": "^0.0.1-local.25",
+    "@tinystacks/aws-cdk-constructs": "^0.0.1-local.29",
     "@tinystacks/utils": "^0.0.1-local.3",
     "aws-cdk-lib": "^2.38.0",
     "constructs": "^10.1.78",
