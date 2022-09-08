@@ -20,7 +20,7 @@ spec:
         app.kubernetes.io/name: sfe-app
     spec:
       containers:
-      - image: 849087520365.dkr.ecr.us-west-1.amazonaws.com/image-for-helm-pipeline-image-for-helm-single-file-express:latest
+      - image: 222140259348.dkr.ecr.us-west-1.amazonaws.com/sfe-uw1-pipeline-sfe-uw1-single-file-express:latest
         imagePullPolicy: Always
         name: sfe-app
         ports:
