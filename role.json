@@ -1,0 +1,501 @@
+{
+  "Parameters": {
+    "TinyStacksToken": {
+      "Description": "DO NOT CHANGE OR SHARE THIS. This is a temporary TinyStacks token unique to your user",
+      "Type": "String"
+    },
+    "TinyStacksUserId": {
+      "Description": "DO NOT CHANGE OR SHARE THIS. This is your unique group id, it's necessary for deleting this role",
+      "Type": "String"
+    },
+    "DeployRoleArn": {
+      "Description": "DO NOT CHANGE OR SHARE THIS. This is the identifier of the unique deploy role that will deploy hello-helm into your account.",
+      "Type": "String"
+    },
+    "RoleName": {
+      "Description": "DO NOT CHANGE OR SHARE THIS. This is the unique identifier for the execution role that will live in your account.",
+      "Type": "String"
+    },
+    "StackName": {
+      "Description": "DO NOT CHANGE THIS.",
+      "Type": "String"
+    },
+    "SourceName": {
+      "Description": "DO NOT CHANGE THIS.",
+      "Type": "String"
+    },
+    "SourceOwner": {
+      "Description": "DO NOT CHANGE THIS.",
+      "Type": "String"
+    },
+    "IsGroup": {
+      "Description": "DO NOT CHANGE THIS.",
+      "Type": "String",
+      "AllowedValues": [
+        "TRUE",
+        "FALSE"
+      ]
+    }
+  },
+  "Resources": {
+    "Role": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "RoleName": {
+          "Ref": "RoleName"
+        },
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": "arn:aws:iam::849087520365:role/tinystacks-service-role"
+              },
+              "Action": [
+                "sts:AssumeRole"
+              ]
+            },
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": {
+                  "Ref": "DeployRoleArn"
+                }
+              },
+              "Action": [
+                "sts:AssumeRole"
+              ]
+            }
+          ]
+        },
+        "Policies": [
+          {
+            "PolicyName": "MiscPolicy",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "servicequotas:Get*",
+                    "pricing:GetProducts"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          },
+          {
+            "PolicyName": "PublishCfnEventsPolicy",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "sns:Publish"
+                  ],
+                  "Resource": [
+                    "arn:aws:sns:*:849087520365:cfn-events-sns-topic*",
+                    "arn:aws:sns:us-east-1:849087520365:tinystacks-role-alerts"
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "PolicyName": "AllowAssumingCdkRoles",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "sts:AssumeRole"
+                  ],
+                  "Resource": [
+                    {
+                      "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/cdk*"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "PolicyName": "CdkBucketPolicy",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "s3:*"
+                  ],
+                  "Resource": [
+                    "arn:aws:s3:::cdk*"
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "PolicyName": "CdkSsmParameterPolicy",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "ssm:GetParameter"
+                  ],
+                  "Resource": [
+                    "arn:aws:ssm::*:parameter/cdk-bootstrap/*"
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "PolicyName": "CdkCloudFormationPolicy",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "cloudformation:DescribeStacks",
+                    "cloudformation:GetTemplate",
+                    "cloudformation:DescribeStackResources"
+                  ],
+                  "Resource": [
+                    {
+                      "Fn::Sub": "arn:aws:cloudformation:*:${AWS::AccountId}:stack/CDKToolkit*"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "ts_created_by",
+            "Value": "TinyStacks"
+          }
+        ]
+      }
+    },
+    "IdentityAndSecretManagementPolicy": {
+      "Type": "AWS::IAM::ManagedPolicy",
+      "Properties": {
+        "ManagedPolicyName": {
+          "Fn::Sub": "${AWS::StackName}-secret-and-identity-management-policy"
+        },
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": [
+                "iam:List*",
+                "iam:Get*",
+                "iam:*Tag*",
+                "iam:Untag*",
+                "iam:Describe*",
+                "iam:CreateInstanceProfile",
+                "iam:DeleteInstanceProfile",
+                "iam:AddRoleToInstanceProfile",
+                "iam:RemoveRoleFromInstanceProfile",
+                "iam:CreatePolicy*",
+                "iam:DeletePolicy*",
+                "iam:CreateRole",
+                "iam:UpdateRole",
+                "iam:PassRole",
+                "iam:DeleteRole",
+                "iam:PutRolePolicy",
+                "iam:DeleteRolePolicy",
+                "iam:AttachRolePolicy",
+                "iam:UpdateAssumeRolePolicy",
+                "iam:DetachRolePolicy",
+                "ssm:PutParameter",
+                "ssm:GetParameters",
+                "ssm:GetParameter",
+                "ssm:DeleteParameter",
+                "ssm:DeleteParameters",
+                "ssm:*Tag*"
+              ],
+              "Resource": "*"
+            }
+          ]
+        },
+        "Roles": [
+          {
+            "Ref": "Role"
+          }
+        ]
+      }
+    },
+    "ScalingPolicy": {
+      "Type": "AWS::IAM::ManagedPolicy",
+      "Properties": {
+        "ManagedPolicyName": {
+          "Fn::Sub": "${AWS::StackName}-scaling-policy"
+        },
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": [
+                "autoscaling:Describe*",
+                "autoscaling:*Tag*",
+                "autoscaling:CreateScalingPlan",
+                "autoscaling:GetScalingPlanResourceForecastData",
+                "autoscaling:UpdateScalingPlan",
+                "autoscaling:DeleteScalingPlan",
+                "autoscaling:CreateLaunchConfiguration",
+                "autoscaling:DeleteLaunchConfiguration",
+                "autoscaling:CreateAutoScalingGroup",
+                "autoscaling:DeleteAutoScalingGroup",
+                "autoscaling:TerminateInstanceInAutoScalingGroup",
+                "autoscaling:UpdateAutoScalingGroup",
+                "autoscaling:PutScalingPolicy",
+                "autoscaling:DeletePolicy",
+                "autoscaling:ExecutePolicy",
+                "autoscaling:DeleteLifecycleHook",
+                "autoscaling:PutLifecycleHook",
+                "autoscaling:BatchDeleteScheduledAction",
+                "autoscaling:DeleteScheduledAction",
+                "application-autoscaling:Describe*",
+                "application-autoscaling:*Tag*",
+                "application-autoscaling:RegisterScalableTarget",
+                "application-autoscaling:DeregisterScalableTarget",
+                "application-autoscaling:PutScalingPolicy",
+                "application-autoscaling:DeleteScalingPolicy",
+                "application-autoscaling:DeleteScheduledAction",
+                "application-autoscaling:PutScheduledAction"
+              ],
+              "Resource": "*"
+            }
+          ]
+        },
+        "Roles": [
+          {
+            "Ref": "Role"
+          }
+        ]
+      }
+    },
+    "ComputePolicy": {
+      "Type": "AWS::IAM::ManagedPolicy",
+      "Properties": {
+        "ManagedPolicyName": {
+          "Fn::Sub": "${AWS::StackName}-compute-policy"
+        },
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": [
+                "ec2:Describe*",
+                "ec2:*Tag*",
+                "ec2:CreateImage",
+                "ec2:CopyImage",
+                "ec2:ExportImage",
+                "ec2:ImportImage",
+                "ec2:ImportImage",
+                "ec2:RegisterImage",
+                "ec2:DeregisterImage",
+                "ec2:StartInstances",
+                "ec2:RunInstances",
+                "ec2:RebootInstances",
+                "ec2:TerminateInstances",
+                "ec2:StopInstances",
+                "ec2:CreateInternetGateway",
+                "ec2:AttachInternetGateway",
+                "ec2:DetachInternetGateway",
+                "ec2:DeleteInternetGateway",
+                "ec2:CreateNatGateway",
+                "ec2:DeleteNatGateway",
+                "ec2:CreateRoute",
+                "ec2:RepalceRoute",
+                "ec2:DeleteRoute",
+                "ec2:CreateRouteTable",
+                "ec2:AssociateRouteTable",
+                "ec2:ReplaceRoute*",
+                "ec2:DisassociateRouteTable",
+                "ec2:DeleteRouteTable",
+                "ec2:CreateSecurityGroup",
+                "ec2:DeleteSecurityGroup",
+                "ec2:AuthorizeSecurityGroupIngress",
+                "ec2:RevokeSecurityGroupIngress",
+                "ec2:AuthorizeSecurityGroupEgress",
+                "ec2:RevokeSecurityGroupEgress",
+                "ec2:AssociateSubnetCidrBlock",
+                "ec2:CreateDefaultSubnet",
+                "ec2:CreateSubnet",
+                "ec2:CreateSubnetCidrReservation",
+                "ec2:DeleteSubnet",
+                "ec2:DeleteSubnetCidrReservation",
+                "ec2:DisassociateSubnetCidrBlock",
+                "ec2:GetSubnetCidrReservations",
+                "ec2:ModifySubnetAttribute",
+                "ec2:CreateVpc",
+                "ec2:DeleteVpc",
+                "ec2:ModifyVpcAttribute",
+                "ec2:AcceptTransitGatewayVpcAttachment",
+                "ec2:CreateTransitGatewayVpcAttachment",
+                "ec2:DeleteTransitGatewayVpcAttachment",
+                "ec2:ModifyTransitGatewayVpcAttachment",
+                "ec2:RejectTransitGatewayVpcAttachment",
+                "ec2:AcceptVpcPeeringConnection",
+                "ec2:CreateVpcPeeringConnection",
+                "ec2:DeleteVpcPeeringConnection",
+                "ec2:ModifyVpcPeeringConnectionOptions",
+                "ec2:RejectVpcPeeringConnection",
+                "ec2:AllocateAddress",
+                "ec2:ReleaseAddress",
+                "ec2:AssociateAddress",
+                "ec2:DisassociateAddress",
+                "ec2:ModifyAddressAttribute",
+                "ec2:ResetAddressAttribute",
+                "ec2:AllocateHosts",
+                "ec2:ModifyInstanceAttribute"
+              ],
+              "Resource": "*"
+            }
+          ]
+        },
+        "Roles": [
+          {
+            "Ref": "Role"
+          }
+        ]
+      }
+    },
+    "MonitoringPolicy": {
+      "Type": "AWS::IAM::ManagedPolicy",
+      "Properties": {
+        "ManagedPolicyName": {
+          "Fn::Sub": "${AWS::StackName}-monitoring-policy"
+        },
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": [
+                "cloudformation:*",
+                "cloudwatch:*Tag*",
+                "cloudwatch:DeleteDashboards",
+                "cloudwatch:Get*",
+                "cloudwatch:ListDashboards",
+                "cloudwatch:PutDashboard",
+                "logs:Get*",
+                "logs:Describe*",
+                "logs:*Tag*",
+                "logs:CreateLog*",
+                "logs:DeleteLog*",
+                "logs:ListLogDeliveries",
+                "logs:UpdateLogDelivery",
+                "logs:PutResourcePolicy",
+                "logs:PutRetentionPolicy",
+                "logs:*LogEvents",
+                "ce:*"
+              ],
+              "Resource": "*"
+            }
+          ]
+        },
+        "Roles": [
+          {
+            "Ref": "Role"
+          }
+        ]
+      }
+    },
+    "CustomResourcePolicy": {
+      "Type": "AWS::IAM::ManagedPolicy",
+      "Properties": {
+        "ManagedPolicyName": {
+          "Fn::Sub": "${AWS::StackName}-custom-resource-policy"
+        },
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": [
+                "lambda:List*",
+                "lambda:Get*",
+                "lambda:*Tag*",
+                "lambda:CreateFunction",
+                "lambda:UpdateFunction",
+                "lambda:DeleteFunction",
+                "lambda:AddPermission",
+                "lambda:RemovePermission",
+                "lambda:InvokeFunction",
+                "lambda:DeleteFunctionCodeSigningConfig",
+                "lambda:DeleteFunctionConcurrency",
+                "lambda:DeleteFunctionEventInvokeConfig",
+                "lambda:PutFunctionCodeSigningConfig",
+                "lambda:PutFunctionConcurrency",
+                "lambda:PutFunctionEventInvokeConfig",
+                "lambda:UpdateFunctionCode",
+                "lambda:UpdateFunctionCodeSigningConfig",
+                "lambda:UpdateFunctionConfiguration",
+                "lambda:UpdateFunctionEventInvokeConfig",
+                "lambda:AddLayerVersionPermission",
+                "lambda:DeleteLayerVersion",
+                "lambda:PublishLayerVersion",
+                "lambda:RemoveLayerVersionPermission"
+              ],
+              "Resource": "*"
+            }
+          ]
+        },
+        "Roles": [
+          {
+            "Ref": "Role"
+          }
+        ]
+      }
+    },
+    "RegisterRoleWithTinyStacks": {
+      "Type": "Custom::notifyTS",
+      "Properties": {
+        "ServiceToken": "arn:aws:sns:us-east-1:849087520365:tinystacks-register-custom-iac-role",
+        "RoleArn": {
+          "Fn::GetAtt": [
+            "Role",
+            "Arn"
+          ]
+        },
+        "Region": {
+          "Ref": "AWS::Region"
+        },
+        "TinyStacksUserToken": {
+          "Ref": "TinyStacksToken"
+        },
+        "TinyStacksUserId": {
+          "Ref": "TinyStacksUserId"
+        },
+        "StackName": {
+          "Ref": "StackName"
+        },
+        "SourceName": {
+          "Ref": "SourceName"
+        },
+        "SourceOwner": {
+          "Ref": "SourceOwner"
+        },
+        "IsGroup": {
+          "Ref": "IsGroup"
+        }
+      }
+    }
+  }
+}
