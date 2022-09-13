@@ -464,5 +464,16 @@
         ]
       }
     }
+  },
+  "Outputs": {
+    "RoleArn" : {
+      "Description" : "Arn for the execution role",
+      "Value" : {
+        "Fn::GetAtt" : [
+          "Role",
+          "Arn"
+        ]
+      }
+    }
   }
 }
