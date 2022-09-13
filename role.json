@@ -2,11 +2,13 @@
   "Parameters": {
     "TinyStacksToken": {
       "Description": "DO NOT CHANGE OR SHARE THIS. This is a temporary TinyStacks token unique to your user",
-      "Type": "String"
+      "Type": "String",
+      "Default": "stub"
     },
     "TinyStacksUserId": {
       "Description": "DO NOT CHANGE OR SHARE THIS. This is your unique group id, it's necessary for deleting this role",
-      "Type": "String"
+      "Type": "String",
+      "Default": "stub"
     },
     "DeployRoleArn": {
       "Description": "DO NOT CHANGE OR SHARE THIS. This is the identifier of the unique deploy role that will deploy hello-helm into your account.",
@@ -22,11 +24,13 @@
     },
     "SourceName": {
       "Description": "DO NOT CHANGE THIS.",
-      "Type": "String"
+      "Type": "String",
+      "Default": "stub"
     },
     "SourceOwner": {
       "Description": "DO NOT CHANGE THIS.",
-      "Type": "String"
+      "Type": "String",
+      "Default": "stub"
     },
     "IsGroup": {
       "Description": "DO NOT CHANGE THIS.",
@@ -34,7 +38,8 @@
       "AllowedValues": [
         "TRUE",
         "FALSE"
-      ]
+      ],
+      "Default": "FALSE"
     }
   },
   "Resources": {
